@@ -10,11 +10,14 @@ os.environ['SDL_VIDEO_WINDOW_POS'] = '100,100'
 
 import pgzrun
 import pymunk
+import math  # has PI in it
+import time
 from Circle import Circle
 from Rectangle import Rectangle
 from Paddle import Paddle
+import random
 
-
+#Global variables
 WIDTH = 800
 HEIGHT = 600
 BLOCKS_IN_ROW = 8
@@ -23,13 +26,13 @@ SIDE_PADDING = 50
 TOP_PADDING = 50
 BLOCK_PADDING = 5
 
-
-
+ball: Circle
+global space
 def update():
     if keyboard.left :
-        paddle.move(-5,0)
+        paddle.move(space,-5,0)
     if keyboard.right :
-        paddle.move(5,0)
+        paddle.move(space,5,0)
     space.step(1 / 50.0)
 
 
@@ -40,8 +43,24 @@ def draw():
     clock.tick(50)
 
 
+def startBall(space) -> Circle:
 
-def InitGame() -> list :
+    ball: Circle = Circle(space,(400,500),10)
+    angle:float = (random.random()*math.pi) -(math.pi/2);
+    velocity:float = 500
+    impulseX:float = math.sin(angle) * velocity
+    impulseY:float = math.cos(angle) * velocity * -1
+    ball.circleBody.apply_impulse_at_local_point((impulseX,impulseY),(0,0))
+    return ball
+
+def MakeSides(space) -> list :
+    leftSide: Rectangle = Rectangle(space,(5,HEIGHT/2),(10,HEIGHT),True)
+    rightSide: Rectangle = Rectangle(space,(WIDTH-5,HEIGHT/2),(10,HEIGHT),True)
+    topSide: Rectangle = Rectangle(space,(WIDTH/2,5),(WIDTH,10),True)
+    bottomSide: Rectangle = Rectangle(space, (WIDTH/2, HEIGHT-5), (WIDTH, 10),True)
+    return [topSide,rightSide,bottomSide,leftSide]
+def MakeBlocks(space) -> list :
+
     #calculate block sizes and positioning
     actorList: list = list()
     block_horizontal_size : int = \
@@ -63,13 +82,15 @@ def InitGame() -> list :
 # Press the green button in the gutter to run the script.
 
 space = pymunk.Space()  # 2
-actorList: list = InitGame()
-paddle:Paddle = Paddle(space,(WIDTH/2,HEIGHT-15),(80,20))
-actorList.append(paddle)
-leftDown: bool = False
-rightDown: bool = False
 #No gravity for this game
 #space.gravity = (0.0, 900.0)
+actorList: list = MakeBlocks(space)
+actorList = actorList + MakeSides(space)
+paddle:Paddle = Paddle(space,(WIDTH/2,HEIGHT-40),(80,20))
+actorList.append(paddle)
+ball:Circle = startBall(space)
+actorList.append(ball)
+
 
 pgzrun.go()
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
