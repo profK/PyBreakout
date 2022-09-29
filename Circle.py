@@ -8,6 +8,7 @@ class Circle :
         self.circleShape.mass = 3
         self.circleShape.friction = 0
         self.circleShape.elasticity = 1
+        self.circleShape.circle = self; # dynamic object trick
         space.add(self.circleBody, self.circleShape)
 
     def draw(self,screen) :

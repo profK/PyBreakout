@@ -69,6 +69,7 @@ def AddWalls(actorList: list) :
     bottomWall: Rectangle = Rectangle(space,(400,590),(800,20),True)
     leftSide: Rectangle = Rectangle(space,(10,300),(20,600),True)
     rightSide: Rectangle = Rectangle(space,(790,300),(20,600),True)
+    bottomWall.setCollisionType(collision_types["bottom"])
     #actorList.append(topWall)
     #actorList.append(bottomWall)
     #actorList.append(leftSide)
@@ -107,6 +108,13 @@ def handle_brick_collision2(arbiter:pymunk.Arbiter, space:pymunk.Space, data) ->
     score = score +10
     return True
 
+def handle_bottom_collision(arbiter:pymunk.Arbiter, space:pymunk.Space, data) -> bool :
+    ballShape = arbiter.shapes[0]
+    actor = ballShape.circle
+    space.remove(ballShape)
+    actorList.remove(actor)
+    return True
+
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
 space = pymunk.Space()
 paddle = Paddle(space,(400,600-20),(70,20))
@@ -115,6 +123,9 @@ ball.setCollisionType(collision_types["ball"])
 collisionHandler = \
     space.add_collision_handler(collision_types["ball"],collision_types["brick"])
 collisionHandler.begin = handle_brick_collision2
+bottomCollisionHandler = \
+    space.add_collision_handler(collision_types["ball"], collision_types["bottom"])
+bottomCollisionHandler.begin = handle_bottom_collision
 StartBall(ball)
 actorList: list = MakeBlocks(space)
 actorList.append(ball)
